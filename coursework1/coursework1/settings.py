@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-r(c71nstr+cmz=^iwsdlq+(d&fsp)m=jnx=3qjfu*gt6pbps-s
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "https://sc21tor.pythonanywhere.com"
+    "sc21tor.pythonanywhere.com"
 ]
 
 # Application definition
