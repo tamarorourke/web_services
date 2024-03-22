@@ -8,10 +8,22 @@ class Author(models.Model):
     password = models.CharField(max_length=20)
 
 class Story(models.Model):
-    headline = models.CharField(max_length=100)
-    category = models.CharField(max_length=20)
-    region = models.CharField(max_length=50)
+    CATEGORY_CHOICES = [
+        ('pol', 'Politics'),
+        ('art', 'Art'),
+        ('tech', 'Technology'),
+        ('trivia', 'Trivia'),
+    ]
+    REGION_CHOICES = [
+        ('uk', 'United Kingdom'),
+        ('eu', 'European Union'),
+        ('w', 'World'),
+    ]
+
+    headline = models.CharField(max_length=64)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    region = models.CharField(max_length=50, choices=REGION_CHOICES)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
-    details = models.CharField(max_length=150)
+    details = models.CharField(max_length=128)
 

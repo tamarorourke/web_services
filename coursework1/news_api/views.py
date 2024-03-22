@@ -20,15 +20,18 @@ def login_user(request):
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-        return JsonResponse({"message": "Welcome!"}, status=200)
+        return HttpResponse("Welcome!", status=200, content_type="text/plain")
     else:
-        return JsonResponse({"error": "Invalid login attempt."}, status=401)
+        return HttpResponse("Invalid login attempt.", status=401, content_type="text/plain")
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def logout_user(request):
-    logout(request)
-    return JsonResponse({"message": "Goodbye!"}, status=200)
+    if not request.user.is_authenticated:
+        return HttpResponse("User is not logged in.", status=400, content_type="text/plain")
+    else:
+        logout(request)
+        return HttpResponse("Goodbye!", status=200, content_type="text/plain")
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -37,7 +40,6 @@ def post_story(request):
     data = json.loads(request.body)
     try:
         author = Author.objects.get(username=request.user.username)
-        # 'Data' - parsed JSON containing the story details
         Story.objects.create(
             headline=data['headline'],
             category=data['category'],
@@ -46,11 +48,6 @@ def post_story(request):
             author=author
         )
         return JsonResponse({"message": "Story posted successfully."}, status=201)
-    except Author.DoesNotExist:
-        # If no Author instance is found for user
-        return HttpResponse("Unable to post story: Author instance not found for the logged-in user.", status=400)
-    except KeyError as e:
-        return HttpResponse(f"Missing data: {e}", status=400)
     except Exception as e:
         return HttpResponse(f"Unable to post story: {str(e)}", status=503, content_type="text/plain")
 
@@ -99,7 +96,7 @@ def stories(request):
         if stories:
             return JsonResponse({"stories": stories_data}, safe=False, status=200)
         else:
-            return HttpResponse("No stories found matching the criteria.", status=404)
+            return HttpResponse("No stories found.", status=404, content_type="text/plain")
 
     else:
         return HttpResponse("Method not allowed", status=405)
@@ -112,9 +109,9 @@ def delete_story(request, story_id):
         # Story to be deleted
         story = Story.objects.get(pk=story_id, author__username=request.user.username)
         story.delete()
-        return JsonResponse({"message": "Story deleted successfully."}, status=200)
+        return JsonResponse({"message": "Story deleted successfully."}, status=200, content_type="text/plain")
     except Story.DoesNotExist:
-        return HttpResponse("Story not found or not authorized to delete.", status=404)
+        return HttpResponse("Story not found or not authorised to delete.", status=503, content_type="text/plain")
     except Exception as e:
-        return HttpResponse(f"An error occurred: {str(e)}", status=500, content_type="text/plain")
+        return HttpResponse(f"An error occurred: {str(e)}", status=503, content_type="text/plain")
 
